@@ -1,0 +1,18 @@
+{
+  "name": "matf-rvtech-awscloud-2025",
+  "version": "1.0.0",
+  "description": "AWS Serverless projekat za prikaz punjača električnih vozila",
+  "scripts": {
+    "deploy": "serverless deploy",
+    "deploy-frontend": "node scripts/deploy-frontend.js"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.477.0",
+    "@aws-sdk/lib-dynamodb": "^3.477.0",
+    "node-fetch": "^2.7.0"
+  },
+  "devDependencies": {
+    "serverless": "^3.38.0",
+    "serverless-localstack": "^1.2.0"
+  }
+}
