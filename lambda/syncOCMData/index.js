@@ -16,46 +16,45 @@ const client = new DynamoDBClient({
 const docClient = DynamoDBDocumentClient.from(client);
 
 exports.handler = async (event) => {
-  console.log('🚀 Lambda funkcija pokrenuta!');
+  console.log('Lambda funkcija pokrenuta!');
   console.log('Event:', JSON.stringify(event, null, 2));
 
   try {
-    console.log('🗑️ Brisanje starih podataka...');
+    console.log('Brisanje starih podataka...');
     await clearOldData();
 
-    console.log('🌍 Preuzimanje podataka sa OCM API-ja...');
+    console.log('Preuzimanje podataka sa OCM API-ja...');
     const chargers = await fetchChargersFromOCM();
-    console.log(`✅ Preuzeto ${chargers.length} punjača`);
+    console.log(`Preuzeto ${chargers.length} punjaca`);
 
-    console.log('💾 Snimanje u DynamoDB...');
+    console.log('Snimanje u DynamoDB...');
     await saveChargersToDB(chargers);
-    console.log('✅ Podaci uspešno snimljeni!');
+    console.log('Podaci uspesno snimljeni!');
 
     return {
       statusCode: 200,
       headers: {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*', 
+        'Access-Control-Allow-Origin': '*',
       },
       body: JSON.stringify({
-        message: 'Sinhronizacija uspešna!',
+        message: 'Sinhronizacija uspesna!',
         chargersCount: chargers.length,
         timestamp: new Date().toISOString(),
       }),
     };
   } catch (error) {
-    console.error('❌ Greška:', error);
+    console.error('Greska:', error);
     return {
       statusCode: 500,
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        error: 'Greška pri sinhronizaciji',
+        error: 'Greska pri sinhronizaciji',
         details: error.message,
       }),
     };
   }
 };
-
 
 async function clearOldData() {
   const result = await docClient.send(new ScanCommand({
@@ -63,7 +62,7 @@ async function clearOldData() {
   }));
 
   if (!result.Items || result.Items.length === 0) {
-    console.log('📭 Nema starih podataka za brisanje');
+    console.log('Nema starih podataka za brisanje');
     return;
   }
 
@@ -74,24 +73,24 @@ async function clearOldData() {
     }));
   }
 
-  console.log(`🗑️ Obrisano ${result.Items.length} starih zapisa`);
+  console.log(`Obrisano ${result.Items.length} starih zapisa`);
 }
 
 async function fetchChargersFromOCM() {
   const OCM_URL = `https://api.openchargemap.io/v3/poi/?output=json&countrycode=234&maxresults=100&compact=true&verbose=false&key=${OCM_API_KEY}`;
 
-  console.log('🔗 API URL:', OCM_URL);
+  console.log('API URL:', OCM_URL);
 
   const response = await fetch(OCM_URL);
   
   if (!response.ok) {
-    throw new Error(`OCM API greška: ${response.status} ${response.statusText}`);
+    throw new Error(`OCM API greska: ${response.status} ${response.statusText}`);
   }
 
   const data = await response.json();
 
   return data.map((charger) => ({
-    chargerId: String(charger.ID), 
+    chargerId: String(charger.ID),
     town: charger.AddressInfo?.Town || 'Unknown',
     address: charger.AddressInfo?.AddressLine1 || 'N/A',
     postcode: charger.AddressInfo?.Postcode || 'N/A',
@@ -112,5 +111,5 @@ async function saveChargersToDB(chargers) {
     }));
   }
 
-  console.log(`💾 Snimljeno ${chargers.length} punjača u DynamoDB`);
+  console.log(`Snimljeno ${chargers.length} punjaca u DynamoDB`);
 }
