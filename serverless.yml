@@ -31,6 +31,15 @@ functions:
           path: /sync
           method: get
 
+  getChargersByTown:
+    handler: lambda/getChargersByTown/index.handler
+    role: SyncOCMDataRole
+    timeout: 10
+    events:
+      - httpApi:
+          path: /chargers/{town}
+          method: get
+
 resources:
   Resources:
     ChargersTable:
