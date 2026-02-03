@@ -1,5 +1,4 @@
-
-[200~version: '3.8'
+version: '3.8'
 
 services:
   localstack:
@@ -7,10 +6,10 @@ services:
     ports:
       - "4566:4566"
     environment:
-      - SERVICES=lambda,dynamodb,s3,apigateway,iam,sts,cloudformation
+      - SERVICES=lambda,dynamodb,s3,apigateway,iam,sts,cloudformation,logs
       - DEBUG=1
       - LAMBDA_EXECUTOR=docker
       - DOCKER_HOST=unix:///var/run/docker.sock
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
-      - "./localstack-data:/var/lib/localstack"~
+      - "./localstack-data:/var/lib/localstack"

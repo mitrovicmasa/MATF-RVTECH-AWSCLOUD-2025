@@ -1,4 +1,5 @@
 service: ev-chargers-api
+frameworkVersion: "3"
 
 provider:
   name: aws
@@ -20,6 +21,9 @@ custom:
     host: http://localhost
     edgePort: 4566
     autostart: false
+  s3Sync:
+    - bucketName: ev-chargers-frontend-${sls:stage}
+      localDir: web
 
 functions:
   syncOCMData:
@@ -27,7 +31,7 @@ functions:
     role: SyncOCMDataRole
     timeout: 30
     events:
-      - httpApi:
+    - http:
           path: /sync
           method: get
 
@@ -36,7 +40,7 @@ functions:
     role: SyncOCMDataRole
     timeout: 10
     events:
-      - httpApi:
+      - http:
           path: /chargers/{town}
           method: get
 
@@ -98,3 +102,10 @@ resources:
                     - logs:CreateLogStream
                     - logs:PutLogEvents
                   Resource: "*"
+
+    FrontendBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ev-chargers-frontend-${sls:stage}
+        WebsiteConfiguration:
+          IndexDocument: index.html
