@@ -4,7 +4,8 @@
   "description": "AWS Serverless projekat za prikaz punjača električnih vozila",
   "scripts": {
     "deploy": "serverless deploy",
-    "deploy-frontend": "node scripts/deploy-frontend.js"
+    "deploy-frontend": "node scripts/deploy-frontend.js",
+    "deploy-frontend-fixed-bucket": "awslocal s3 sync ./web s3://punjaci-website"  
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.477.0",
@@ -12,7 +13,7 @@
     "node-fetch": "^2.7.0"
   },
   "devDependencies": {
-    "serverless": "^3.38.0",
+    "serverless": "^3.40.0",
     "serverless-localstack": "^1.2.0"
   }
 }
