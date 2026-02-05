@@ -1,0 +1,113 @@
+service: ev-chargers-api
+frameworkVersion: "3"
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: us-east-1
+  stage: ${opt:stage, 'dev'}
+  
+  environment:
+    CHARGERS_TABLE: ${self:service}-chargers-${sls:stage}
+    OCM_API_KEY: 7c33820c-6610-4eac-81c1-5312f48f0707 #${env:OCM_API_KEY, ''}
+
+plugins:
+  - serverless-localstack
+
+custom:
+  localstack:
+    stages:
+      - dev
+    host: http://localhost
+    edgePort: 4566
+    autostart: false
+  s3Sync:
+    - bucketName: punjaci-website
+      localDir: web
+
+functions:
+  syncChargersData:
+    handler: lambda/syncChargersData/index.handler
+    role: ChargersLambdaRole
+    timeout: 30
+    events:
+    - http:
+          path: /sync
+          method: get
+          cors: true
+
+  getChargersByCity:
+    handler: lambda/getChargersByCity/index.handler
+    role: ChargersLambdaRole
+    timeout: 10
+    events:
+      - http:
+          path: /chargers/{town}
+          method: get
+          cors: true
+
+resources:
+  Resources:
+    ChargersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.CHARGERS_TABLE}
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: chargerId
+            AttributeType: S
+          - AttributeName: town
+            AttributeType: S
+        KeySchema:
+          - AttributeName: chargerId
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: TownIndex
+            KeySchema:
+              - AttributeName: town
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+
+    ChargersLambdaRole:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: chargers-lambda-role-${sls:stage}
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service: lambda.amazonaws.com
+              Action: sts:AssumeRole
+        Policies:
+          - PolicyName: DynamoDBAccess
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - dynamodb:PutItem
+                    - dynamodb:BatchWriteItem
+                    - dynamodb:Scan
+                    - dynamodb:Query
+                  Resource:
+                    - !GetAtt ChargersTable.Arn
+                    - !Join ['/', [!GetAtt ChargersTable.Arn, 'index/*']]
+          - PolicyName: CloudWatchLogs
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - logs:CreateLogGroup
+                    - logs:CreateLogStream
+                    - logs:PutLogEvents
+                  Resource: "*"
+
+    FrontendBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: punjaci-website
+        WebsiteConfiguration:
+          IndexDocument: index.html
