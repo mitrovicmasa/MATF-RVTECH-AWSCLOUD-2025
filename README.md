@@ -1,10 +1,10 @@
 # MATF-RVTECH-AWSCLOUD-2025
 
-AWS Serverless projekat za prikaz punjača električnih vozila - MATF 2025
+AWS Serverless projekat za prikaz punjača električnih vozila na kursu "Razvoj aplikacija u klaud okruženju"- MATF 2026
 
 ## Autori
-- Masa Mitrović
-- Žarija (dodaj svoje ime)
+- Maša Mitrović
+- Zarija Trtović
 
 ## Tehnologije
 - AWS Lambda (Node.js)
@@ -13,10 +13,6 @@ AWS Serverless projekat za prikaz punjača električnih vozila - MATF 2025
 - API Gateway
 - LocalStack (za lokalni development)
 
-## Instalacija
-```bash
-npm install
-```
 
 ## Pokretanje
 ```bash
