@@ -4,8 +4,8 @@ const { DynamoDBDocumentClient, BatchWriteCommand, ScanCommand } = require('@aws
 // hardkodovan URL da ne bi bilo "undefined" greske
 const OCM_API_KEY = process.env.OCM_API_KEY;
 const OCM_URL = 'https://api.openchargemap.io/v3/poi/'; 
-const TABLE_NAME = process.env.CHARGERS_TABLE;
-const BATCH_SIZE = 25;
+const DB_TABLE = process.env.CHARGERS_TABLE;
+const WRITE_BATCH_SIZE = 25;
 
 const DYNAMODB_ENDPOINT = process.env.LOCALSTACK_HOSTNAME
   ? `http://${process.env.LOCALSTACK_HOSTNAME}:4566`
@@ -71,21 +71,21 @@ exports.handler = async () => {
 
 
     const batches = [];
-    for (let i = 0; i < items.length; i += BATCH_SIZE) {
-      batches.push(items.slice(i, i + BATCH_SIZE));
+    for (let i = 0; i < items.length; i += WRITE_BATCH_SIZE) {
+      batches.push(items.slice(i, i + WRITE_BATCH_SIZE));
     }
 
     for (const batch of batches) {
       await docClient.send(new BatchWriteCommand({
         RequestItems: {
-          [TABLE_NAME]: batch.map(item => ({ PutRequest: { Item: item } }))
+          [DB_TABLE]: batch.map(item => ({ PutRequest: { Item: item } }))
         }
       }));
     }
 
     const currentIds = new Set(items.map(item => item.chargerId));
     const scanResult = await docClient.send(new ScanCommand({
-      TableName: TABLE_NAME,
+      TableName: DB_TABLE,
       ProjectionExpression: 'chargerId',
     }));
 
@@ -95,13 +95,13 @@ exports.handler = async () => {
       
     if (staleIds.length > 0) {
       const deleteBatches = [];
-      for (let i = 0; i < staleIds.length; i += BATCH_SIZE) {
-        deleteBatches.push(staleIds.slice(i, i + BATCH_SIZE));
+      for (let i = 0; i < staleIds.length; i += WRITE_BATCH_SIZE) {
+        deleteBatches.push(staleIds.slice(i, i + WRITE_BATCH_SIZE));
       }
       for (const batch of deleteBatches) {
         await docClient.send(new BatchWriteCommand({
           RequestItems: {
-            [TABLE_NAME]: batch.map(id => ({ DeleteRequest: { Key: { chargerId: id } } }))
+            [DB_TABLE]: batch.map(id => ({ DeleteRequest: { Key: { chargerId: id } } }))
           }
         }));
       }

@@ -139,7 +139,7 @@
     <script>
       // KONFIGURACIJA - promeni API_ID ako treba
       // Dobij sa: awslocal apigateway get-rest-apis --query 'items[0].id' --output text
-      const API_ID = 'ddvebfeunv';
+      const API_ID = '5wv2etxrgq';
       const API_BASE_URL = `http://localhost:4566/restapis/${API_ID}/dev/_user_request_`;
       
       // Inicijalizuj mapu (centrirana na Srbiju)
@@ -243,7 +243,7 @@
         try {
           const response = await fetch(`${API_BASE_URL}/sync`); // Ovo je endpoint za Lambda funkciju koja ažurira DynamoDB tabelu punjača
           const data = await response.json();
-          status.textContent = `Sync završen! Upisano: ${data.count}, Obrisano: ${data.deleted}`;
+          status.textContent = `Sync završen! Upisano: ${data.chargersCount}, Obrisano: ${data.deletedCount}`;
           console.log('Sync rezultat:', data);
         } catch (error) {
           status.textContent = 'Sync greška: ' + error.message;

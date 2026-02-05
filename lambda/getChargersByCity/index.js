@@ -1,7 +1,7 @@
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
 const { DynamoDBDocumentClient, QueryCommand } = require('@aws-sdk/lib-dynamodb');
 
-const TABLE_NAME = process.env.CHARGERS_TABLE;
+const DB_TABLE = process.env.CHARGERS_TABLE;
 
 const DYNAMODB_ENDPOINT = process.env.LOCALSTACK_HOSTNAME
   ? `http://${process.env.LOCALSTACK_HOSTNAME}:4566`
@@ -39,7 +39,7 @@ exports.handler = async (event) => {
 
   try {
     const result = await docClient.send(new QueryCommand({
-      TableName: TABLE_NAME,
+      TableName: DB_TABLE,
       IndexName: 'TownIndex',
       KeyConditionExpression: 'town = :town',
       ExpressionAttributeValues: {

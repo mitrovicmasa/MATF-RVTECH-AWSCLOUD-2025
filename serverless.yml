@@ -26,9 +26,9 @@ custom:
       localDir: web
 
 functions:
-  syncOCMData:
-    handler: lambda/syncOCMData/index.handler
-    role: SyncOCMDataRole
+  syncChargersData:
+    handler: lambda/syncChargersData/index.handler
+    role: ChargersLambdaRole
     timeout: 30
     events:
     - http:
@@ -36,9 +36,9 @@ functions:
           method: get
           cors: true
 
-  getChargersByTown:
-    handler: lambda/getChargersByTown/index.handler
-    role: SyncOCMDataRole
+  getChargersByCity:
+    handler: lambda/getChargersByCity/index.handler
+    role: ChargersLambdaRole
     timeout: 10
     events:
       - http:
@@ -69,10 +69,10 @@ resources:
             Projection:
               ProjectionType: ALL
 
-    SyncOCMDataRole:
+    ChargersLambdaRole:
       Type: AWS::IAM::Role
       Properties:
-        RoleName: syncOCMdata-role-${sls:stage}
+        RoleName: chargers-lambda-role-${sls:stage}
         AssumeRolePolicyDocument:
           Version: "2012-10-17"
           Statement:
